@@ -212,5 +212,17 @@ class News_model extends MY_Model
         }
         return $res;
     }
+    
+    
+    public static function create($data){
+
+        $CI =& get_instance();
+	    $res = $CI->s->from(self::NEWS_TABLE)->insert($_insert_data)->execute();
+	    if(!$res){
+	        return FALSE;
+        }
+	    return new self($CI->s->insert_id);
+    }
+    
 
 }
