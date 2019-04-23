@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | environments.
 |
 */
-$config['base_url'] = 'https://base_url.com/';
+$config['base_url'] = 'https://ci_test.loc/';
 
 /*
 |--------------------------------------------------------------------------
