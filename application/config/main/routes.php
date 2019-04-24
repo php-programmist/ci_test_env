@@ -62,6 +62,8 @@ $route['error'] = 'main_page/error';
 $route['tos'] = 'main_page/tos';
 $route['faq'] = 'main_page/faq';
 $route['top'] = 'main_page/top';
+$route['likeable'] = 'news';
+
 
 $route['ref(:any)'] = 'partner/bestref/$1';
 
