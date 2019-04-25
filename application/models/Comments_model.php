@@ -6,8 +6,8 @@ class Comments_model extends MY_Model
     const TABLE = 'comments';
     
     protected $id;
+    protected $user_id;
     protected $news_id;
-    protected $name;
     protected $text;
     protected $created_at;
     
@@ -20,46 +20,48 @@ class Comments_model extends MY_Model
         $this->set_id($id);
     }
     
-    public static function add($data)
+    /**
+     * @param array $data
+     *
+     * @return bool|Comments_model
+     */
+    public static function create(array $data)
     {
-        $CI =& get_instance();
+        $CI  =& get_instance();
         $res = $CI->s->from(self::TABLE)->insert($data)->execute();
         if ( ! $res) {
-            throw new Exception('Error during comment saving');
+            return false;
         }
-    
-        return $CI->s->insert_id;
+        
+        return new self($CI->s->insert_id);
     }
     
-    /**
-     * @param $params
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public static function validate($params)
-    {
-        if ( $params['news_id'] < 1) {
-            throw new Exception('Wrong news_id');
-        }
-        if ( empty($params['name'])) {
-            throw new Exception('Empty name');
-        }
-        if ( empty($params['text'])) {
-            throw new Exception('Empty text');
-        }
-        return true;
-    }
     
     /**
-     * @param $id
+     * @param int $id
      *
      * @return mixed
      */
-    public static function remove($id)
+    public static function remove(int $id)
     {
         $CI  =& get_instance();
         return $CI->s->from(self::TABLE)->where('id', $id)->delete()->execute();
+    }
+    
+    /**
+     * @param array $data
+     *
+     * @return bool
+     */
+    public static function isUsersComment(array $data):bool
+    {
+        $CI =& get_instance();
+        $id = $CI->s->from(self::TABLE)
+                    ->where('id', $data['id'])
+                    ->where('user_id', $data['user_id'])
+                    ->value('id');
+    
+        return (boolean)$id;
     }
     
 }

@@ -1,14 +1,13 @@
 <?php
-require_once 'Likeable.php';
-class News extends Likeable
+require_once 'JsonController.php';
+
+class News extends JsonController
 {
     protected $response_data;
 
     public function __construct()
     {
         parent::__construct();
-
-        $this->CI =& get_instance();
         $this->load->model('news_model');
     }
     

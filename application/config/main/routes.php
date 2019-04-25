@@ -56,13 +56,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 // }else{
 
 $route['default_controller'] = 'tests';
-$route['404_override'] = 'api/error_404';
-$route['404'] = 'api/error_404';
-$route['error'] = 'main_page/error';
-$route['tos'] = 'main_page/tos';
-$route['faq'] = 'main_page/faq';
-$route['top'] = 'main_page/top';
-$route['likeable'] = 'news';
+$route['404_override']       = 'api/error_404';
+$route['404']                = 'api/error_404';
+$route['error']              = 'main_page/error';
+$route['tos']                = 'main_page/tos';
+$route['faq']                = 'main_page/faq';
+$route['top']                = 'main_page/top';
 
 
 $route['ref(:any)'] = 'partner/bestref/$1';

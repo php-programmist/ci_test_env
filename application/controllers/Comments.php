@@ -1,6 +1,7 @@
 <?php
-require_once 'Likeable.php';
-class Comments extends Likeable
+require_once 'JsonController.php';
+
+class Comments extends JsonController
 {
     protected $response_data;
 
@@ -10,37 +11,78 @@ class Comments extends Likeable
         $this->load->model('comments_model');
     }
     
-    /**
-     * @param int $news_id - ID of commented news
-     */
-    public function add(int $news_id)
+    
+    public function create(int $news_id=0,string $text='')
     {
-        $name = trim(strip_tags($this->input->post_get('name')));
-        $text = trim(strip_tags($this->input->post_get('text')));
-        $data = compact('news_id','name','text');
-        try{
-            Comments_model::validate($data);
-            $this->response_data->data->id = Comments_model::add($data);
-        } catch (Exception $e){
-            $this->response_data->status = 'error';
-            $this->response_data->error_message = $e->getMessage();
+        if (is_cli()) {
+            //php index.php comments create 1 "test text"
+            $data = compact('news_id','text');
         }
-        $this->response($this->response_data);
+        else{
+            $data = $this->input->post();
+        }
+        if (empty($data)) {
+            return $this->sendResponse('error', 'NO_POST_DATA_ERROR');
+        }
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules('news_id', 'News ID', 'trim|required|numeric');
+        $this->form_validation->set_rules('text', 'Text', 'trim|required');
+    
+        if ($this->form_validation->run() === false) {
+            return $this->sendResponse('error', implode(', ', $this->form_validation->error_array()));
+        }
+    
+        if ( ! $this->user_id) {
+            return $this->sendResponse('error', 'NO_AUTH_ERROR');
+        }
+        
+        $comment_data = [
+            'user_id' => $this->user_id,
+            'news_id' => trim($data['news_id']),
+            'text' => trim(strip_tags($data['text'])),
+        ];
+        
+        if ( ! ($comment_model = Comments_model::create($comment_data))) {
+            return $this->sendResponse('error', 'DIDNT_SAVE_COMMENT_ERROR');
+        }
+        $comment_data['id'] = $comment_model->get_id();
+        $this->response_data->data = $comment_data;
+        return $this->sendResponse('success');
     }
     
-    /**
-     * @param int $id - ID of comment
-     */
-    public function remove(int $id)
+    public function remove(int $id=0)
     {
-        try{
-            Comments_model::remove($id);
-            Likes_model::remove($id,get_class($this));
-        } catch (Exception $e){
-            $this->response_data->status = 'error';
-            $this->response_data->error_message = $e->getMessage();
+        if (is_cli()) {
+            //php index.php comments remove 1
+            $data = compact('id');
         }
-        $this->response($this->response_data);
+        else{
+            $data = $this->input->post();
+        }
+        if (empty($data)) {
+            return $this->sendResponse('error', 'NO_POST_DATA_ERROR');
+        }
+        $this->form_validation->set_data($data);
+        $this->form_validation->set_rules('id', 'Comment ID', 'trim|required|numeric');
+        
+    
+        if ($this->form_validation->run() === false) {
+            return $this->sendResponse('error', implode(', ', $this->form_validation->error_array()));
+        }
+    
+        if ( ! $this->user_id) {
+            return $this->sendResponse('error', 'NO_AUTH_ERROR');
+        }
+        $data['user_id'] = $this->user_id;
+        if ( ! Comments_model::isUsersComment($data)) {
+            return $this->sendResponse('error', 'NOT_AUTHOR_ERROR');
+        }
+    
+        if ( !Comments_model::remove($data['id'])) {
+            return $this->sendResponse('error', 'DIDNT_REMOVE_COMMENT_ERROR');
+        }
+        
+        return $this->sendResponse('success');
     }
     
 }

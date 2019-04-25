@@ -104,7 +104,7 @@ switch (ENVIRONMENT)
  * Include the path if the folder is not in the same directory
  * as this file.
  */
-$system_path = ENVIRONMENT === 'docker' ? '/project/system' : str_replace('/public','',$_SERVER['DOCUMENT_ROOT']).'/system';
+$system_path = ENVIRONMENT === 'docker' ? '/project/system' : 'D:\OSPanel\domains\ci_test.loc\system';
 
 /*
  *---------------------------------------------------------------
@@ -119,7 +119,7 @@ $system_path = ENVIRONMENT === 'docker' ? '/project/system' : str_replace('/publ
  *
  * NO TRAILING SLASH!
  */
-$application_folder = ENVIRONMENT === 'docker' ? '/project/application/' : str_replace('/public','',$_SERVER['DOCUMENT_ROOT']).'/application';
+$application_folder = ENVIRONMENT === 'docker' ? '/project/application/' :'D:\OSPanel\domains\ci_test.loc\application';
 
 /*
  *---------------------------------------------------------------
