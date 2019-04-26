@@ -11,6 +11,7 @@ class News_model extends MY_Model
     const NEWS_TABLE = APPLICATION_NEWS;
     const PAGE_LIMIT = 5;
     const LATEST_LIMIT = 3;
+    const POPULAR_LIMIT = 3;
     const DESC_LIMIT = 300;
     
     protected $id;
@@ -256,12 +257,77 @@ class News_model extends MY_Model
     {
         
         $CI  =& get_instance();
-        $res = $CI->s->from(self::NEWS_TABLE)->insert($_insert_data)->execute();
+        $res = $CI->s->from(self::NEWS_TABLE)->insert($data)->execute();
         if ( ! $res) {
             return false;
         }
         
         return new self($CI->s->insert_id);
+    }
+    
+    /**
+     * @param int $id
+     * @param int $user_id
+     *
+     * @return mixed
+     */
+    public static function getItemById(int $id,int $user_id)
+    {
+        $CI =& get_instance();
+    
+        $item = $CI->s->from(self::NEWS_TABLE.' as n')
+                       ->leftJoin('likes as l', ['l.entity_id' => 'n.id','l.entity_type'=>'"news"'])
+                       ->leftJoin('likes as l2', ['l2.entity_id' => 'n.id','l2.entity_type'=>'"news"','l2.user_id'=>$user_id])
+                       ->where('n.id',$id)
+                       ->groupBy('n.id')
+                       ->select([
+                           'n.id',
+                           'header',
+                           'text',
+                           'views',
+                           'img',
+                           'n.time_updated',
+                           'COUNT(l.id) as likes',
+                           'COUNT(l2.id) as liked',
+                       ])->one();
+        
+        return $item;
+    }
+    
+    /**
+     * @return mixed
+     */
+    public static function getPopular()
+    {
+        $CI =& get_instance();
+    
+        $items= $CI->s->from(self::NEWS_TABLE.' as n')
+                      ->leftJoin('likes as l', ['l.entity_id' => 'n.id','l.entity_type'=>'"news"'])
+                      ->groupBy('n.id')
+                      ->sortDesc(['likes','views'])
+                      ->limit(self::POPULAR_LIMIT)
+                      ->select([
+                          'n.id',
+                          'header',
+                          'views',
+                          'COUNT(l.id) as likes',
+                      ])->many();
+        return $items;
+    }
+    
+    /**
+     * @param int $id
+     * @param int $views
+     *
+     * @return mixed
+     */
+    public static function setViews(int $id,int $views)
+    {
+        $CI =& get_instance();
+        return $CI->s->from(self::NEWS_TABLE)
+            ->where(['id'=>$id])
+            ->update(['views'=>$views])
+            ->execute();
     }
     
 }

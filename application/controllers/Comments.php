@@ -46,6 +46,8 @@ class Comments extends JsonController
             return $this->sendResponse('error', 'DIDNT_SAVE_COMMENT_ERROR');
         }
         $comment_data['id'] = $comment_model->get_id();
+        $comment_data['likes'] = 0;
+        $comment_data['liked'] = 0;
         $this->response_data->data = $comment_data;
         return $this->sendResponse('success');
     }
